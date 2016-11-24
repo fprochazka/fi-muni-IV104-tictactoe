@@ -43,14 +43,13 @@ public:
 				debugPlayground(out);
 			}
 
-			in >> x;
-			in >> y;
-			if (x == -1 && y == -1) {
-				break; // end
-			}
-			if (!enemyPlace((Coordinate) x, (Coordinate) y, err)) {
-				continue;
-			}
+			do {
+				in >> x;
+				in >> y;
+				if (x == -1 && y == -1) {
+					return; // end
+				}
+			} while (!enemyPlace((Coordinate) x, (Coordinate) y, err));
 
 			if (ourSymbol == 'O') {
 				ourPlacement = computerPlace();
