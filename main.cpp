@@ -49,7 +49,7 @@ public:
 	}
 
 	bool enemyPlace(Coordinate x, Coordinate y, std::ostream &err) {
-		if (x > boardSize || y > boardSize) {
+		if (x > boardSize - 1 || y > boardSize - 1) {
 			err << "out of bounds: fuck off" << std::endl;
 			return 0;
 		}
