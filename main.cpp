@@ -37,18 +37,26 @@ public:
 		Coordinates ourPlacement;
 		int x, y;
 		while (true) {
+			if (ourSymbol == 'X') {
+				ourPlacement = computerPlace();
+				out << ourPlacement.first << " " << ourPlacement.second << std::endl;
+				debugPlayground(out);
+			}
+
 			in >> x;
 			in >> y;
 			if (x == -1 && y == -1) {
 				break; // end
 			}
-
 			if (!enemyPlace((Coordinate) x, (Coordinate) y, err)) {
 				continue;
 			}
-			ourPlacement = computerPlace();
-			out << ourPlacement.first << " " << ourPlacement.second << std::endl;
-			debugPlayground(out);
+
+			if (ourSymbol == 'O') {
+				ourPlacement = computerPlace();
+				out << ourPlacement.first << " " << ourPlacement.second << std::endl;
+				debugPlayground(out);
+			}
 		}
 	}
 
@@ -80,44 +88,83 @@ public:
 			{-1, 1}, // vlevo dolu
 			{-1, 0} // vlevo
 		};
-		unsigned maxDanger = 0;
+
+		int maxDanger = 0;
 		Coordinates maxDangerPosition;
 		std::vector<unsigned> dangerLevels(boardSize * boardSize);
+
+		int maxAttack = 0;
+		Coordinates maxAttackPosition;
+		std::vector<unsigned> attackLevels(boardSize * boardSize);
+
 		for (Coordinate y = 0; y < boardSize ;y++) {
 			for (Coordinate x = 0; x < boardSize ;x++) {
-				if (board[positionFromCoordinates(x, y)] != enemySymbol) {
-					continue; // safe
-				}
-
-				for (size_t d = 0;d < 8; d++) {
-					Coordinate dx = x;
-					Coordinate dy = y;
-					for (size_t change = 1; change <= 4; change++) {
-						if (dx + checkDirections[d][0] < 0 || dx + checkDirections[d][0] > boardSize - 1) {
-							break; // bound
-						}
-						if (dy + checkDirections[d][1] < 0 || dy + checkDirections[d][1] > boardSize - 1) {
-							break; // bound
-						}
-
-						dx += checkDirections[d][0];
-						dy += checkDirections[d][1];
-
-						Coordinate position = positionFromCoordinates(dx, dy);
-						if (board[position] == ourSymbol) {
-							break;
-						}
-						if (board[position] == '-') {
-							dangerLevels[position] += change;
-							if (dangerLevels[position] > maxDanger) {
-								maxDanger = dangerLevels[position];
-								maxDangerPosition = {dx, dy};
+				if (board[positionFromCoordinates(x, y)] == enemySymbol) {
+					for (size_t d = 0;d < 8; d++) {
+						Coordinate dx = x;
+						Coordinate dy = y;
+						for (size_t change = 1; change <= 4; change++) {
+							if (dx + checkDirections[d][0] < 0 || dx + checkDirections[d][0] > boardSize - 1) {
+								break; // bound
 							}
-							break;
+							if (dy + checkDirections[d][1] < 0 || dy + checkDirections[d][1] > boardSize - 1) {
+								break; // bound
+							}
+
+							dx += checkDirections[d][0];
+							dy += checkDirections[d][1];
+
+							Coordinate position = positionFromCoordinates(dx, dy);
+							if (board[position] == ourSymbol) {
+								break;
+							}
+							if (board[position] == '-') {
+								dangerLevels[position] += change;
+								if (dangerLevels[position] > maxDanger) {
+									maxDanger = dangerLevels[position];
+									maxDangerPosition = {dx, dy};
+								}
+								break;
+							}
+						}
+					}
+
+				} else if (board[positionFromCoordinates(x, y)] == ourSymbol) {
+					for (size_t d = 0;d < 8; d++) {
+						Coordinate dx = x;
+						Coordinate dy = y;
+						for (size_t change = 1; change <= 4; change++) {
+							if (dx + checkDirections[d][0] < 0 || dx + checkDirections[d][0] > boardSize - 1) {
+								break; // bound
+							}
+							if (dy + checkDirections[d][1] < 0 || dy + checkDirections[d][1] > boardSize - 1) {
+								break; // bound
+							}
+
+							dx += checkDirections[d][0];
+							dy += checkDirections[d][1];
+
+							Coordinate position = positionFromCoordinates(dx, dy);
+							if (board[position] == enemySymbol) {
+								break;
+							}
+							if (board[position] == '-') {
+								attackLevels[position] += change;
+								if (attackLevels[position] > maxAttack) {
+									maxAttack = attackLevels[position];
+									maxAttackPosition = {dx, dy};
+								}
+								break;
+							}
 						}
 					}
 				}
 			}
+		}
+
+		if (maxAttack - maxDanger > 3) {
+			board[positionFromCoordinates(maxAttackPosition.first, maxAttackPosition.second)] = ourSymbol;
+			return maxAttackPosition;
 		}
 
 		if (maxDanger > 1) {
