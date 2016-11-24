@@ -149,7 +149,7 @@ public:
 								break;
 							}
 							if (board[position] == '-') {
-								attackLevels[position] += change;
+								attackLevels[position] += change > 3 ? 1337 : change;
 								if (attackLevels[position] > maxAttack) {
 									maxAttack = attackLevels[position];
 									maxAttackPosition = {dx, dy};
@@ -162,7 +162,7 @@ public:
 			}
 		}
 
-		if (maxAttack - maxDanger > 3) {
+		if (maxAttack > 0 && (maxAttack - maxDanger > 2 || maxDanger < 2)) {
 			board[positionFromCoordinates(maxAttackPosition.first, maxAttackPosition.second)] = ourSymbol;
 			return maxAttackPosition;
 		}
@@ -172,15 +172,18 @@ public:
 			return maxDangerPosition;
 		}
 
-		do {
-			finalPlacement = {random(boardSize - 1), random(boardSize - 1)};
-			Coordinate position = positionFromCoordinates(finalPlacement.first, finalPlacement.second);
-			if (board[position] == '-') {
-				board[position] = ourSymbol;
-				break;
-			}
+		finalPlacement = {(boardSize - 1) / 2, (boardSize - 1) / 2};
+		board[positionFromCoordinates(finalPlacement.first, finalPlacement.second)] = ourSymbol;
 
-		} while(true);
+//		do {
+//			finalPlacement = {random(boardSize - 1), random(boardSize - 1)};
+//			Coordinate position = positionFromCoordinates(finalPlacement.first, finalPlacement.second);
+//			if (board[position] == '-') {
+//				board[position] = ourSymbol;
+//				break;
+//			}
+//
+//		} while(true);
 
 		return finalPlacement;
 	}
