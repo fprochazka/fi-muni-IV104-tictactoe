@@ -35,11 +35,15 @@ public:
 		enemySymbol = ourSymbol == 'X' ? 'O' : 'X';
 
 		Coordinates ourPlacement;
-		Coordinate x, y;
+		int x, y;
 		while (true) {
 			in >> x;
 			in >> y;
-			if (!enemyPlace(x, y, err)) {
+			if (x == -1 && y == -1) {
+				break; // end
+			}
+
+			if (!enemyPlace((Coordinate) x, (Coordinate) y, err)) {
 				continue;
 			}
 			ourPlacement = computerPlace();
@@ -64,10 +68,74 @@ public:
 	}
 
 	Coordinates computerPlace() {
-		Coordinates placement(random(boardSize - 1), random(boardSize - 1));
-		board[positionFromCoordinates(placement.first, placement.second)] = ourSymbol;
+		Coordinates finalPlacement;
 
-		return placement;
+		int checkDirections[8][2] = {
+			{-1, -1}, // vlevo nahoru
+			{0, -1}, // nad
+			{1, -1}, // vpravo nahoru
+			{1, 0}, // vpravo
+			{1, 1}, // vpravo dolu
+			{0, 1}, // dolu
+			{-1, 1}, // vlevo dolu
+			{-1, 0} // vlevo
+		};
+		unsigned maxDanger = 0;
+		Coordinates maxDangerPosition;
+		std::vector<unsigned> dangerLevels(boardSize * boardSize);
+		for (Coordinate y = 0; y < boardSize ;y++) {
+			for (Coordinate x = 0; x < boardSize ;x++) {
+				if (board[positionFromCoordinates(x, y)] != enemySymbol) {
+					continue; // safe
+				}
+
+				for (size_t d = 0;d < 8; d++) {
+					Coordinate dx = x;
+					Coordinate dy = y;
+					for (size_t change = 1; change <= 4; change++) {
+						if (dx + checkDirections[d][0] < 0 || dx + checkDirections[d][0] > boardSize - 1) {
+							break; // bound
+						}
+						if (dy + checkDirections[d][1] < 0 || dy + checkDirections[d][1] > boardSize - 1) {
+							break; // bound
+						}
+
+						dx += checkDirections[d][0];
+						dy += checkDirections[d][1];
+
+						Coordinate position = positionFromCoordinates(dx, dy);
+						if (board[position] == ourSymbol) {
+							break;
+						}
+						if (board[position] == '-') {
+							dangerLevels[position] += change;
+							if (dangerLevels[position] > maxDanger) {
+								maxDanger = dangerLevels[position];
+								maxDangerPosition = {dx, dy};
+							}
+							break;
+						}
+					}
+				}
+			}
+		}
+
+		if (maxDanger > 1) {
+			board[positionFromCoordinates(maxDangerPosition.first, maxDangerPosition.second)] = ourSymbol;
+			return maxDangerPosition;
+		}
+
+		do {
+			finalPlacement = {random(boardSize - 1), random(boardSize - 1)};
+			Coordinate position = positionFromCoordinates(finalPlacement.first, finalPlacement.second);
+			if (board[position] == '-') {
+				board[position] = ourSymbol;
+				break;
+			}
+
+		} while(true);
+
+		return finalPlacement;
 	}
 
 	Coordinate positionFromCoordinates(Coordinate x, Coordinate y) {
