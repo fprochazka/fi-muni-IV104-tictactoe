@@ -95,6 +95,6 @@ public:
 
 int main() {
 	TicTacToe ttt;
-	ttt.run(std::cin, std::cout);
+	ttt.run(std::cin, std::cout, std::cerr);
 	return 0;
 }
