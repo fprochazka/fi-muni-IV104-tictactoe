@@ -103,10 +103,10 @@ public:
 						Coordinate dx = x;
 						Coordinate dy = y;
 						for (size_t change = 1; change <= 4; change++) {
-							if (dx + checkDirections[d][0] < 0 || dx + checkDirections[d][0] > boardSize - 1) {
+							if ((int) (dx + checkDirections[d][0]) < 0 || (int) (dx + checkDirections[d][0]) > ((int) boardSize - 1)) {
 								break; // bound
 							}
-							if (dy + checkDirections[d][1] < 0 || dy + checkDirections[d][1] > boardSize - 1) {
+							if ((int) (dy + checkDirections[d][1]) < 0 || (int) (dy + checkDirections[d][1]) > ((int) boardSize - 1)) {
 								break; // bound
 							}
 
@@ -119,7 +119,7 @@ public:
 							}
 							if (board[position] == '-') {
 								dangerLevels[position] += change;
-								if (dangerLevels[position] > maxDanger) {
+								if ((int) dangerLevels[position] > maxDanger) {
 									maxDanger = dangerLevels[position];
 									maxDangerPosition = {dx, dy};
 								}
@@ -133,10 +133,10 @@ public:
 						Coordinate dx = x;
 						Coordinate dy = y;
 						for (size_t change = 1; change <= 4; change++) {
-							if (dx + checkDirections[d][0] < 0 || dx + checkDirections[d][0] > boardSize - 1) {
+							if ((int) (dx + checkDirections[d][0]) < 0 || (int) (dx + checkDirections[d][0]) > ((int) boardSize - 1)) {
 								break; // bound
 							}
-							if (dy + checkDirections[d][1] < 0 || dy + checkDirections[d][1] > boardSize - 1) {
+							if ((int) (dy + checkDirections[d][1]) < 0 || (int) (dy + checkDirections[d][1]) > ((int) boardSize - 1)) {
 								break; // bound
 							}
 
@@ -149,7 +149,7 @@ public:
 							}
 							if (board[position] == '-') {
 								attackLevels[position] += change > 3 ? 1337 : change;
-								if (attackLevels[position] > maxAttack) {
+								if ((int) attackLevels[position] > maxAttack) {
 									maxAttack = attackLevels[position];
 									maxAttackPosition = {dx, dy};
 								}
@@ -161,28 +161,28 @@ public:
 			}
 		}
 
-		if (maxAttack > 0 && (maxAttack - maxDanger > 2 || maxDanger < 2)) {
-			board[positionFromCoordinates(maxAttackPosition.first, maxAttackPosition.second)] = ourSymbol;
-			return maxAttackPosition;
-		}
+//		if (maxAttack > 0 && (maxAttack - maxDanger > 2 || maxDanger < 2)) {
+//			board[positionFromCoordinates(maxAttackPosition.first, maxAttackPosition.second)] = ourSymbol;
+//			return maxAttackPosition;
+//		}
 
 		if (maxDanger > 1) {
 			board[positionFromCoordinates(maxDangerPosition.first, maxDangerPosition.second)] = ourSymbol;
 			return maxDangerPosition;
 		}
 
-		finalPlacement = {(boardSize - 1) / 2, (boardSize - 1) / 2};
-		board[positionFromCoordinates(finalPlacement.first, finalPlacement.second)] = ourSymbol;
+//		finalPlacement = {(boardSize - 1) / 2, (boardSize - 1) / 2};
+//		board[positionFromCoordinates(finalPlacement.first, finalPlacement.second)] = ourSymbol;
 
-//		do {
-//			finalPlacement = {random(boardSize - 1), random(boardSize - 1)};
-//			Coordinate position = positionFromCoordinates(finalPlacement.first, finalPlacement.second);
-//			if (board[position] == '-') {
-//				board[position] = ourSymbol;
-//				break;
-//			}
-//
-//		} while(true);
+		do {
+			finalPlacement = {random(boardSize - 1), random(boardSize - 1)};
+			Coordinate position = positionFromCoordinates(finalPlacement.first, finalPlacement.second);
+			if (board[position] == '-') {
+				board[position] = ourSymbol;
+				break;
+			}
+
+		} while(true);
 
 		return finalPlacement;
 	}
