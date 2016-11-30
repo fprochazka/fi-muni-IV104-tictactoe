@@ -9,6 +9,7 @@
 #include <ctime>
 #include <cmath>
 
+#define DEBUG_CHECK_WINNER 1
 #define DEBUG_SIMPLE 1
 #define DEBUG_HEAT 0
 #define DEBUG_QUEUE 0
@@ -79,6 +80,9 @@ public:
 			if (ourSymbol == SYMBOL_X) {
 				ourPlacement = computerPlace(out, err);
 				out << ourPlacement.x << " " << ourPlacement.y << std::endl;
+				if (DEBUG_CHECK_WINNER && debugCheckWinner(out, ourPlacement)) {
+					break;
+				}
 			}
 
 			do {
@@ -88,10 +92,16 @@ public:
 					return; // end
 				}
 			} while (!enemyPlace({(Coordinate) playerX, (Coordinate) playerY}, err));
+			if (DEBUG_CHECK_WINNER && debugCheckWinner(out, {(Coordinate) playerX, (Coordinate) playerY})) {
+				break;
+			}
 
 			if (ourSymbol == SYMBOL_O) {
 				ourPlacement = computerPlace(out, err);
 				out << ourPlacement.x << " " << ourPlacement.y << std::endl;
+				if (DEBUG_CHECK_WINNER && debugCheckWinner(out, ourPlacement)) {
+					break;
+				}
 			}
 		}
 	}
@@ -239,6 +249,10 @@ public:
 			heat *= 10;
 		}
 
+		if (symbol == enemySymbol && heat >= 3) {
+			heat *= 3;
+		}
+
 		return playableFields >= 5 ? heat : 0;
 	}
 
@@ -278,6 +292,47 @@ public:
 	bool isValidCoordinates(int x, int y) {
 		return !(x < 0 || x > ((int) boardSize) - 1)
 			&& !(y < 0 || y > ((int) boardSize) - 1);
+	}
+
+	bool debugCheckWinner(std::ostream &out, const Coordinates &lastMove) {
+		Coordinate movePosition = positionFromCoordinates(lastMove);
+		Symbol moveSymbol = board[movePosition];
+
+		for (size_t dir = 0; dir < 4; dir++) { // intentionally only 4 !!!
+			Diagonal diagonal;
+			Coordinates diffCursor(
+				lastMove.x + checkDirections[dir][0] * 5,
+				lastMove.y + checkDirections[dir][1] * 5
+			);
+			for (int i = 0; i < 9; i++) {
+				diffCursor.x += checkDirections[dir][0] * -1;
+				diffCursor.y += checkDirections[dir][1] * -1;
+				if (!isValidCoordinates(diffCursor.x, diffCursor.y)) {
+					diagonal[i] = SYMBOL_BOUND;
+					continue;
+				}
+
+				Coordinate diagonalPosition = positionFromCoordinates(diffCursor);
+				diagonal[i] = board[diagonalPosition];
+			}
+
+			size_t sameInRow = 0;
+			for (size_t i = 0; i < 9 ;i++) {
+				if (moveSymbol != diagonal[i]) {
+					sameInRow = 0;
+				} else {
+					sameInRow++;
+				}
+
+				if (sameInRow >= 5) {
+					debugPlayground(out, board);
+					out << "Vyhral hrac " << moveSymbol << ", CG!" << std::endl;
+					return true;
+				}
+			}
+		}
+
+		return false;
 	}
 
 	void debugPlayground(std::ostream &out, const std::vector<char> boardData) {
