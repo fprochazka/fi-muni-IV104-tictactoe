@@ -9,8 +9,10 @@
 #include <ctime>
 #include <cmath>
 
-#define DEBUG_HEAT 1
-#define DEBUG_DIAGONAL 1
+#define DEBUG_SIMPLE 1
+#define DEBUG_HEAT 0
+#define DEBUG_QUEUE 0
+//#define DEBUG_DIAGONAL 0
 #define SYMBOL_X 'X'
 #define SYMBOL_O 'O'
 #define SYMBOL_BOUND 'B'
@@ -127,9 +129,6 @@ public:
 
 
 				if (board[originCursorPosition] != SYMBOL_EMPTY) {
-					if (DEBUG_HEAT) {
-						err << "Queue na kontrolu obsahuje neprazdne policko: " << originCursor.x << "x" << originCursor.y << std::endl;
-					}
 					continue;
 				}
 
@@ -195,6 +194,10 @@ public:
 			debugHeatLevels(out, finalPlacement, heatLevels);
 		}
 
+		if (DEBUG_SIMPLE) {
+			debugPlayground(out, board);
+		}
+
 		return finalPlacement;
 	}
 
@@ -209,10 +212,10 @@ public:
 	size_t calculateDiagonalHeatForSymbol(Symbol symbol, const Diagonal &diagonal) const {
 		size_t heat = 0;
 		size_t playableFields = 1; // middle
-		bool symbolsInRow = true; // middle
 		Symbol opositeSymbol = symbol == SYMBOL_O ? SYMBOL_X :SYMBOL_O;
 
 		for (int i = -1; i <= 1 ; i += 2) { // both directions from position 4
+			bool symbolsInRow = true; // middle
 			for (int j = 4 + i; j > 0 && j < 9 ;j += i) {
 				if (diagonal[j] == SYMBOL_BOUND || diagonal[j] == opositeSymbol) {
 					break; // nowhere to play here
@@ -224,9 +227,16 @@ public:
 
 				playableFields++; // our or empty
 				if (symbolsInRow) {
-					heat += pow(2, i > 0 ? (j - 4) : (4 - j));
+					heat++;
 				}
 			}
+		}
+
+		if (heat >= 4) {
+			heat *= 100;
+
+		} else if (heat >= 3) {
+			heat *= 10;
 		}
 
 		return playableFields >= 5 ? heat : 0;
@@ -302,10 +312,12 @@ public:
 		boardCopy[positionFromCoordinates(maxHeatPosition)] = '#';
 		debugPlayground(out, boardCopy);
 
-		for (Coordinate position = 0; position < (boardFields) ;position++) {
-			boardCopy[position] = boardCheckPositions[position] ? '?' : board[position];
+		if (DEBUG_QUEUE) {
+			for (Coordinate position = 0; position < (boardFields) ;position++) {
+				boardCopy[position] = boardCheckPositions[position] ? '?' : board[position];
+			}
+			debugPlayground(out, boardCopy);
 		}
-		debugPlayground(out, boardCopy);
 	}
 
 	void initPlayground() {
