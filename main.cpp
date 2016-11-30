@@ -9,8 +9,8 @@
 #include <ctime>
 #include <cmath>
 
-#define DEBUG_CHECK_WINNER 1
-#define DEBUG_SIMPLE 1
+#define DEBUG_CHECK_WINNER 0
+#define DEBUG_SIMPLE 0
 #define DEBUG_HEAT 0
 #define DEBUG_QUEUE 0
 //#define DEBUG_DIAGONAL 0
