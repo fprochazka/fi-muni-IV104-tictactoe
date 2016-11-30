@@ -9,7 +9,6 @@
 #include <ctime>
 #include <cmath>
 
-#define DEBUG 0
 #define DEBUG_HEAT 1
 #define DEBUG_DIAGONAL 1
 #define SYMBOL_X 'X'
@@ -28,11 +27,6 @@ public:
 	Coordinates(Coordinate x, Coordinate y) : x(x), y(y) {}
 	Coordinates() {}
 };
-
-//unsigned numberOfDigits(int n) {
-//	n = abs(n);
-//	return (unsigned) (n > 0 ? (int) log10 ((double) n) + 1 : 1);
-//}
 
 unsigned random(unsigned from, unsigned to) {
 	std::random_device device;
@@ -83,9 +77,6 @@ public:
 			if (ourSymbol == SYMBOL_X) {
 				ourPlacement = computerPlace(out, err);
 				out << ourPlacement.x << " " << ourPlacement.y << std::endl;
-				if (DEBUG) {
-					debugPlayground(out, board);
-				}
 			}
 
 			do {
@@ -99,9 +90,6 @@ public:
 			if (ourSymbol == SYMBOL_O) {
 				ourPlacement = computerPlace(out, err);
 				out << ourPlacement.x << " " << ourPlacement.y << std::endl;
-				if (DEBUG) {
-					debugPlayground(out, board);
-				}
 			}
 		}
 	}
@@ -139,7 +127,7 @@ public:
 
 
 				if (board[originCursorPosition] != SYMBOL_EMPTY) {
-					if (DEBUG || DEBUG_HEAT) {
+					if (DEBUG_HEAT) {
 						err << "Queue na kontrolu obsahuje neprazdne policko: " << originCursor.x << "x" << originCursor.y << std::endl;
 					}
 					continue;
@@ -275,17 +263,6 @@ public:
 
 	Coordinate positionFromCoordinates(Coordinates point) {
 		return point.x + (point.y * boardSize);
-	}
-
-	Coordinates coordinatesFromPosition(Coordinate position) {
-		return {
-			(position % boardSize) + 1,
-			(position / boardSize) + 1,
-		};
-	}
-
-	int moveVectorCoordinate(int coordinate, int direction, int change = 1) {
-		return coordinate + (direction * change) * (change < 0 ? -1 : 1);
 	}
 
 	bool isValidCoordinates(int x, int y) {
